@@ -21,23 +21,21 @@ using tcp = boost::asio::ip::tcp;
 
 Client::Client(std::string branch) : _branch(branch) {};
 
-std::map<std::string, std::vector<std::map<std::string, std::string>>> Client::getPackages()
+std::map<std::string, std::map<std::string, std::string>> Client::getPackages()
 {
     json::value json_text = getResponse();
     
     for(int i = 0; i < json::value_to<int>(json_text.at("length")); i++)
     {
         json::value package = json_text.at("packages").at(i);
-        std::map<std::string, std::string> info_of_package;
 
-        info_of_package["name"] = json::value_to<std::string>(package.at("name"));
-        info_of_package["version-release"] =
+        std::string arch = json::value_to<std::string>(package.at("arch"));
+        std::string name = json::value_to<std::string>(package.at("name"));
+        std::string version_release =
             json::value_to<std::string>(package.at("version")) + "-" +
             json::value_to<std::string>(package.at("release"));
-        info_of_package["source"] = json::value_to<std::string>(package.at("source"));
 
-        _packages[json::value_to<std::string>(package.at("arch"))]
-            .push_back(info_of_package);
+        _packages[arch][name] = version_release;
     }
 
     return _packages;

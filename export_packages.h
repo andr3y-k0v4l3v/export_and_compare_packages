@@ -19,13 +19,13 @@ namespace ExportPackages
     std::string _archs;
     std::string _host = "rdb.altlinux.org";
     std::string _target = "/api/export/branch_binary_packages/";
-    std::map< std::string, std::vector<std::map<std::string, std::string>> > _packages;
+    std::map< std::string, std::map<std::string, std::string> > _packages;
 
     boost::asio::io_context _ioc;
 
     public:
         explicit Client(std::string branch);
-        std::map<std::string, std::vector<std::map<std::string, std::string>>> getPackages();
+        std::map<std::string, std::map<std::string, std::string>> getPackages();
     private:
         boost::json::value getResponse();
         beast::ssl_stream<beast::tcp_stream> initContextAndSSL();
