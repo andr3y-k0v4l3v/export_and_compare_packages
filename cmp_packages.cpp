@@ -1,4 +1,4 @@
-#include "export_packages.h"
+#include <export_packages.h>
 #include <iostream>
 #include <fstream>
 #include <bits/stdc++.h>
@@ -12,35 +12,41 @@ using boost::property_tree::write_json;
 using namespace std;
 
 class CmpPackages {
-    map<string, map<string, string>> _p10_packages;
-    map<string, map<string, string>> _sisyphus_packages;
+    string _name_branch1;
+    string _name_branch2;
+    map<string, map<string, string>> _b2_packages;
+    map<string, map<string, string>> _b1_packages;
 
-    map<string, map<string, string>> _in_sisyphus_not_p10;
-    map<string, map<string, string>> _in_p10_not_sisyphus;
-    map<string, map<string, string>> _ver_over_sisyphus_p10;
+    map<string, map<string, string>> _in_b1_not_b2;
+    map<string, map<string, string>> _in_b2_not_b1;
+    map<string, map<string, string>> _ver_over_b1_b2;
 
     public:
-        explicit CmpPackages(map<string, map<string, string>> p10_packages,
-                             map<string, map<string, string>> sisyphus_packages);
+        explicit CmpPackages(string name_branch1="sisyphus", string name_branch2="p10");
         void getAllDataConvertToJSON();
     private:
         void generateData(string first_branch);
-        void genVerOverSisyphusP10();
+        void genVerOverB1B2();
         void convertToJSONSaveToFile();
         ptree convertDataToPtree(map<string, map<string, string>> data);
 };
 
-CmpPackages::CmpPackages(map<string, map<string, string>> p10_packages,
-                         map<string, map<string, string>> sisyphus_packages)
-    : _p10_packages(p10_packages)
-    , _sisyphus_packages(sisyphus_packages) {};
+CmpPackages::CmpPackages(string name_branch1, string name_branch2)
+    : _name_branch1(name_branch1), _name_branch2(name_branch2)
+{
+    ExportPackages::Client branch1(_name_branch1);
+    ExportPackages::Client branch2(_name_branch2);
 
-void CmpPackages::generateData(string first_branch="sisyphus"){
-    map<string, map<string, string>> first_branch_packages = _sisyphus_packages;
-    map<string, map<string, string>> second_branch_packages = _p10_packages;
-    if (first_branch == "p10"){
-        first_branch_packages = _p10_packages;
-        second_branch_packages = _sisyphus_packages;
+    _b1_packages = branch1.getPackages();
+    _b2_packages = branch2.getPackages();
+};
+
+void CmpPackages::generateData(string first_branch){
+    map<string, map<string, string>> first_branch_packages = _b1_packages;
+    map<string, map<string, string>> second_branch_packages = _b2_packages;
+    if (first_branch == _name_branch2){
+        first_branch_packages = _b2_packages;
+        second_branch_packages = _b1_packages;
     }
 
     for (const auto& [arch, packages] : first_branch_packages){
@@ -48,26 +54,26 @@ void CmpPackages::generateData(string first_branch="sisyphus"){
             map<string, string>::iterator it;
             it = second_branch_packages[arch].find(name);
             if (it == second_branch_packages[arch].end()){
-                if(first_branch == "p10") _in_p10_not_sisyphus[arch][name] = version;
-                else _in_sisyphus_not_p10[arch][name] = version;
+                if(first_branch == _name_branch2) _in_b2_not_b1[arch][name] = version;
+                else _in_b1_not_b2[arch][name] = version;
             }
         }
     }
 }
 
-void CmpPackages::genVerOverSisyphusP10()
+void CmpPackages::genVerOverB1B2()
 {
-    for (const auto& [arch, packages] : _sisyphus_packages){
-        map<string, string> sisyphus_packages = packages;
-        map<string, string> p10_packages = _p10_packages[arch];
-        for (const auto& [name, version] : sisyphus_packages){
+    for (const auto& [arch, packages] : _b1_packages){
+        map<string, string> b1_packages = packages;
+        map<string, string> b2_packages = _b2_packages[arch];
+        for (const auto& [name, version] : b1_packages){
             map<string, string>::iterator it;
-            it = p10_packages.find(name);
-            if (it != p10_packages.end()) {
-                string version_sisyphus_package = sisyphus_packages[name];
-                string version_p10_package = it->second;
-                if (rpmvercmp(version_sisyphus_package.c_str(), version_p10_package.c_str()))
-                    _ver_over_sisyphus_p10[arch][name] = version_sisyphus_package;
+            it = b2_packages.find(name);
+            if (it != b2_packages.end()) {
+                string version_b1_package = b1_packages[name];
+                string version_b2_package = it->second;
+                if (rpmvercmp(version_b1_package.c_str(), version_b2_package.c_str()))
+                    _ver_over_b1_b2[arch][name] = version_b1_package;
             }
         }
     }
@@ -90,9 +96,12 @@ void CmpPackages::convertToJSONSaveToFile()
 {
     ptree pt;
 
-    pt.add_child("packages_in_sisyphus_not_p10", convertDataToPtree(_in_sisyphus_not_p10));
-    pt.add_child("packages_in_p10_not_sisyphus", convertDataToPtree(_in_p10_not_sisyphus));
-    pt.add_child("packages_ver_over_sisyphus_p10", convertDataToPtree(_ver_over_sisyphus_p10));
+    pt.add_child("packages_in_"+_name_branch1+"_not_"+_name_branch2,
+                 convertDataToPtree(_in_b1_not_b2));
+    pt.add_child("packages_in_"+_name_branch2+"_not_"+_name_branch1,
+                 convertDataToPtree(_in_b2_not_b1));
+    pt.add_child("packages_ver_over_"+_name_branch1+"_"+_name_branch2,
+                 convertDataToPtree(_ver_over_b1_b2));
 
     ofstream buf;
     buf.open("output.json");
@@ -102,19 +111,16 @@ void CmpPackages::convertToJSONSaveToFile()
 
 void CmpPackages::getAllDataConvertToJSON()
 {
-    generateData();
-    generateData("p10");
-    genVerOverSisyphusP10();
+    generateData(_name_branch1);
+    generateData(_name_branch2);
+    genVerOverB1B2();
     convertToJSONSaveToFile();
 }
 
 int main()
 {
-    ExportPackages::Client p10("p10");
-    ExportPackages::Client sisyphus("sisyphus");
-
     cout << "Receive packages..." << endl;
-    CmpPackages cmp_packages(p10.getPackages(), sisyphus.getPackages());
+    CmpPackages cmp_packages;
     cout << "Received packages" << endl;
     cmp_packages.getAllDataConvertToJSON();
 
