@@ -6,6 +6,6 @@ using namespace std;
 int main()
 {
     ExportPackages::Client client("p10");
-    cout << client.getResponse().at("packages").at(0).at("name") << endl;
+    cout << client.getPackages()["armh"][0]["name"] << endl;
     return 0;
 }

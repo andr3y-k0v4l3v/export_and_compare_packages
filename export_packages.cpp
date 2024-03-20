@@ -9,7 +9,6 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl.hpp>
-#include <boost/json.hpp>
 #include <openssl/ssl.h>
 
 namespace http = beast::http;
@@ -21,6 +20,28 @@ using namespace ExportPackages;
 using tcp = boost::asio::ip::tcp;
 
 Client::Client(std::string branch) : _branch(branch) {};
+
+std::map<std::string, std::vector<std::map<std::string, std::string>>> Client::getPackages()
+{
+    json::value json_text = getResponse();
+    
+    for(int i = 0; i < json::value_to<int>(json_text.at("length")); i++)
+    {
+        json::value package = json_text.at("packages").at(i);
+        std::map<std::string, std::string> info_of_package;
+
+        info_of_package["name"] = json::value_to<std::string>(package.at("name"));
+        info_of_package["version-release"] =
+            json::value_to<std::string>(package.at("version")) + "-" +
+            json::value_to<std::string>(package.at("release"));
+        info_of_package["source"] = json::value_to<std::string>(package.at("source"));
+
+        _packages[json::value_to<std::string>(package.at("arch"))]
+            .push_back(info_of_package);
+    }
+
+    return _packages;
+}
 
 json::value Client::getResponse()
 {
