@@ -1,4 +1,4 @@
-#include "export_packages.h"
+#include "exp_and_cmp_packages.h"
 
 #include <fstream>
 #include <boost/beast/http.hpp>
@@ -18,11 +18,11 @@ namespace json = boost::json;
 using boost::property_tree::write_json;
 using boost::asio::ip::tcp;
 
-using namespace ExportPackages;
+using namespace ExpAndCmpPackages;
 
-Client::Client(std::string branch) : _branch(branch) {};
+ExportPackages::ExportPackages(std::string branch) : _branch(branch) {};
 
-std::map<std::string, std::map<std::string, std::string>> Client::getPackages()
+std::map<std::string, std::map<std::string, std::string>> ExportPackages::getPackages()
 {
     json::value json_text = getResponse();
     
@@ -42,7 +42,7 @@ std::map<std::string, std::map<std::string, std::string>> Client::getPackages()
     return _packages;
 }
 
-json::value Client::getResponse()
+json::value ExportPackages::getResponse()
 {
     beast::ssl_stream<beast::tcp_stream> stream = initContextAndSSL();
     connectToHost(stream);
@@ -55,7 +55,7 @@ json::value Client::getResponse()
 
     return json_text;}
 
-beast::ssl_stream<beast::tcp_stream> Client::initContextAndSSL()
+beast::ssl_stream<beast::tcp_stream> ExportPackages::initContextAndSSL()
 {
     //Init IO context
     ssl::context context(ssl::context::tlsv13_client);
@@ -78,7 +78,7 @@ beast::ssl_stream<beast::tcp_stream> Client::initContextAndSSL()
     return stream;
 }
 
-void Client::connectToHost(beast::ssl_stream<beast::tcp_stream> &stream)
+void ExportPackages::connectToHost(beast::ssl_stream<beast::tcp_stream> &stream)
 {
     //Connect to HTTPS host
     tcp::resolver resolver(_ioc);
@@ -86,7 +86,7 @@ void Client::connectToHost(beast::ssl_stream<beast::tcp_stream> &stream)
     get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
 }
 
-void Client::createAndSendRequest(beast::ssl_stream<beast::tcp_stream> &stream)
+void ExportPackages::createAndSendRequest(beast::ssl_stream<beast::tcp_stream> &stream)
 {
     //Construct request
     std::string finish_target = _target + _branch;
@@ -101,7 +101,7 @@ void Client::createAndSendRequest(beast::ssl_stream<beast::tcp_stream> &stream)
     http::write(stream, request);
 }
 
-json::value Client::receiveJSONResponse(beast::ssl_stream<beast::tcp_stream> &stream)
+json::value ExportPackages::receiveJSONResponse(beast::ssl_stream<beast::tcp_stream> &stream)
 {
     // Receive response
     std::string response;
@@ -128,8 +128,8 @@ json::value Client::receiveJSONResponse(beast::ssl_stream<beast::tcp_stream> &st
 CmpPackages::CmpPackages(std::string name_branch1, std::string name_branch2)
     : _name_branch1(name_branch1), _name_branch2(name_branch2)
 {
-    Client branch1(_name_branch1);
-    Client branch2(_name_branch2);
+    ExportPackages branch1(_name_branch1);
+    ExportPackages branch2(_name_branch2);
 
     _b1_packages = branch1.getPackages();
     _b2_packages = branch2.getPackages();

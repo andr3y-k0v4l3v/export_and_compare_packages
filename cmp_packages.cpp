@@ -1,4 +1,4 @@
-#include <export_packages.h>
+#include <exp_and_cmp_packages.h>
 #include <iostream>
 
 using namespace std;
@@ -12,7 +12,7 @@ int main(int argc, char** argv)
         return -1;
     }
     cout << "Receive packages..." << endl;
-    ExportPackages::CmpPackages cmp_packages(argv[1], argv[2]);
+    ExpAndCmpPackages::CmpPackages cmp_packages(argv[1], argv[2]);
     cout << "Received packages" << endl;
     cmp_packages.getAllDataConvertToJSON(argv[3]);
 

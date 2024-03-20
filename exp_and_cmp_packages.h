@@ -14,9 +14,9 @@ using boost::property_tree::ptree;
 
 namespace beast = boost::beast;
 
-namespace ExportPackages
+namespace ExpAndCmpPackages
 {
-    class Client
+    class ExportPackages
     {
     std::string _branch;
     std::string _archs;
@@ -27,7 +27,7 @@ namespace ExportPackages
     boost::asio::io_context _ioc;
 
     public:
-        explicit Client(std::string branch);
+        explicit ExportPackages(std::string branch);
         std::map<std::string, std::map<std::string, std::string>> getPackages();
     private:
         boost::json::value getResponse();
