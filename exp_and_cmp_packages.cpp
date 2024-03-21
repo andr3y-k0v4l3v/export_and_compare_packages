@@ -177,7 +177,7 @@ void CmpPackages::genVerOverB1B2()
             if (it != b2_packages.end()) {
                 std::string version_b1_package = b1_packages[name];
                 std::string version_b2_package = it->second;
-                if (rpmvercmp(version_b1_package.c_str(), version_b2_package.c_str()))
+                if (rpmvercmp(version_b1_package.c_str(), version_b2_package.c_str()) == 1)
                     _ver_over_b1_b2[arch][name] = version_b1_package;
             }
         }
