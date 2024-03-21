@@ -2,10 +2,12 @@ CC=g++
 CFLAGS=-shared -fPIC
 LDFLAGS=-L. -lexpcmppackages -lboost_json -lcrypto -lssl -lrpm
 
-SOURCE_EXEC=cmp_packages.cpp
+SOURCE_EXEC=cli_utility.cpp
 EXEC=cmp_packages
 
-SOURCE_LIBRARY=exp_and_cmp_packages.cpp
+FOLDER_LIBRARY=export_and_compare_packages
+EXPORT_LIBRARY=export_packages
+COMPARE_LIBRARY=compare_packages
 HEADER_LIBRARY=exp_and_cmp_packages.h
 LIBRARY=libexpcmppackages.so
 
@@ -17,8 +19,10 @@ DEPENDENCIES=libssl-devel boost-devel boost-asio-devel librpm-devel
 PACKET_MANAGER=apt-get
 
 all:
-	$(CC) $(CFLAGS) $(SOURCE_LIBRARY) -o $(LIBRARY)
-	cp $(HEADER_LIBRARY) $(HEADERS_FOLDER)
+	$(CC) $(FOLDER_LIBRARY)/$(EXPORT_LIBRARY).cpp -c -fPIC
+	$(CC) $(FOLDER_LIBRARY)/$(COMPARE_LIBRARY).cpp -c -fPIC
+	$(CC) $(CFLAGS) -o $(LIBRARY) $(EXPORT_LIBRARY).o $(COMPARE_LIBRARY).o
+	cp $(FOLDER_LIBRARY)/$(HEADER_LIBRARY) $(HEADERS_FOLDER)
 	$(CC) $(SOURCE_EXEC) $(LDFLAGS) -o $(EXEC)
 
 setup:
@@ -30,6 +34,7 @@ install:
 	cp $(EXEC) $(BIN_FOLDER)
 	rm -rf $(LIBRARY)
 	rm -rf $(EXEC)
+	rm -rf *.o
 
 uninstall:
 	rm -rf $(HEADERS_FOLDER)/$(HEADER_LIBRARY)
