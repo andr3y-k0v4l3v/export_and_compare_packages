@@ -11,8 +11,19 @@ int main(int argc, char** argv)
         cout << "Example:" << endl << "cmp_packages sisyphus p10 output.json" << endl;
         return -1;
     }
-    cout << "Receive packages..." << endl;
-    ExpAndCmpPackages::CmpPackages cmp_packages(argv[1], argv[2]);
+
+    string name_branch1 = argv[1];
+    string name_branch2 = argv[2];
+    string file_name    = argv[3];
+
+    ExpAndCmpPackages::ExportPackages branch1(name_branch1);
+    ExpAndCmpPackages::ExportPackages branch2(name_branch2);
+    ExpAndCmpPackages::CmpPackages cmp_packages(name_branch1, name_branch2);
+
+    cout << "Receive " << name_branch1 << " packages..." << endl;
+    cmp_packages.setBranch1Packages(branch1.getPackages());
+    cout << "Receive " << name_branch2 << " packages..." << endl;
+    cmp_packages.setBranch2Packages(branch2.getPackages());
     cout << "Received packages" << endl;
     cmp_packages.getAllDataConvertToJSON(argv[3]);
 

@@ -1,5 +1,5 @@
-#ifndef EXPORT_PACKAGES_H
-#define EXPORT_PACKAGES_H
+#ifndef EXP_AND_CMP_PACKAGES_H
+#define EXP_AND_CMP_PACKAGES_H
 
 #include <string>
 #include <bits/stdc++.h>
@@ -18,13 +18,13 @@ namespace ExpAndCmpPackages
 {
     class ExportPackages
     {
-    std::string _branch;
-    std::string _archs;
-    std::string _host = "rdb.altlinux.org";
-    std::string _target = "/api/export/branch_binary_packages/";
-    std::map< std::string, std::map<std::string, std::string> > _packages;
+        std::string _branch;
+        std::string _archs;
+        std::string _host = "rdb.altlinux.org";
+        std::string _target = "/api/export/branch_binary_packages/";
+        std::map< std::string, std::map<std::string, std::string> > _packages;
 
-    boost::asio::io_context _ioc;
+        boost::asio::io_context _ioc;
 
     public:
         explicit ExportPackages(std::string branch);
@@ -48,13 +48,15 @@ namespace ExpAndCmpPackages
         std::map<std::string, std::map<std::string, std::string>> _ver_over_b1_b2;
 
     public:
-        explicit CmpPackages(std::string name_branch1="sisyphus", std::string name_branch2="p10");
-        void getAllDataConvertToJSON(std::string file_name="output.json");
+        explicit CmpPackages(const std::string name_branch1="sisyphus", const std::string name_branch2="p10");
+        void setBranch1Packages(const std::map<std::string, std::map<std::string, std::string>> b1_packages);
+        void setBranch2Packages(const std::map<std::string, std::map<std::string, std::string>> b2_packages);
+        void getAllDataConvertToJSON(const std::string file_name="output.json");
     private:
-        void generateData(std::string first_branch);
+        void genInB1NotB2(const std::string first_branch);
         void genVerOverB1B2();
-        void convertToJSONSaveToFile(std::string file_name);
-        ptree convertDataToPtree(std::map<std::string, std::map<std::string, std::string>> data);
+        void convertToJSONSaveToFile(const std::string file_name);
+        ptree convertDataToPtree(const std::map<std::string, std::map<std::string, std::string>> data);
     };
 }
 

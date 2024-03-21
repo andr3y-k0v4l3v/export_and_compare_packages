@@ -24,9 +24,10 @@ ExportPackages::ExportPackages(std::string branch) : _branch(branch) {};
 
 std::map<std::string, std::map<std::string, std::string>> ExportPackages::getPackages()
 {
+    // Convert JSON format to map and delete unused information from JSON
     json::value json_text = getResponse();
-    
-    for(int i = 0; i < json::value_to<int>(json_text.at("length")); i++)
+
+    for(unsigned int i = 0; i < json::value_to<unsigned int>(json_text.at("length")); i++)
     {
         json::value package = json_text.at("packages").at(i);
 
@@ -125,20 +126,29 @@ json::value ExportPackages::receiveJSONResponse(beast::ssl_stream<beast::tcp_str
     return json_text;
 }
 
-CmpPackages::CmpPackages(std::string name_branch1, std::string name_branch2)
-    : _name_branch1(name_branch1), _name_branch2(name_branch2)
+
+CmpPackages::CmpPackages(const std::string name_branch1, const std::string name_branch2)
+    : _name_branch1(name_branch1), _name_branch2(name_branch2) {};
+
+void CmpPackages::setBranch1Packages(const std::map<std::string, std::map<std::string, std::string>> b1_packages)
 {
-    ExportPackages branch1(_name_branch1);
-    ExportPackages branch2(_name_branch2);
+    _b1_packages = b1_packages;
+}
 
-    _b1_packages = branch1.getPackages();
-    _b2_packages = branch2.getPackages();
-};
+void CmpPackages::setBranch2Packages(const std::map<std::string, std::map<std::string, std::string>> b2_packages)
+{
+    _b2_packages = b2_packages;
+}
 
-void CmpPackages::generateData(std::string first_branch){
-    std::map<std::string, std::map<std::string, std::string>> first_branch_packages = _b1_packages;
-    std::map<std::string, std::map<std::string, std::string>> second_branch_packages = _b2_packages;
-    if (first_branch == _name_branch2){
+void CmpPackages::genInB1NotB2(const std::string first_branch){
+    // Return all packages that are in the first branch, but not in the second
+    std::map<std::string, std::map<std::string, std::string>> first_branch_packages;
+    std::map<std::string, std::map<std::string, std::string>> second_branch_packages;
+
+    if (first_branch == _name_branch1){
+        first_branch_packages = _b1_packages;
+        second_branch_packages = _b2_packages;
+    } else {
         first_branch_packages = _b2_packages;
         second_branch_packages = _b1_packages;
     }
@@ -157,6 +167,7 @@ void CmpPackages::generateData(std::string first_branch){
 
 void CmpPackages::genVerOverB1B2()
 {
+    // Return all version-release packages of which there are more in the 1st than in the 2nd
     for (const auto& [arch, packages] : _b1_packages){
         std::map<std::string, std::string> b1_packages = packages;
         std::map<std::string, std::string> b2_packages = _b2_packages[arch];
@@ -173,7 +184,8 @@ void CmpPackages::genVerOverB1B2()
     }
 }
 
-ptree CmpPackages::convertDataToPtree(std::map<std::string, std::map<std::string, std::string>> data){
+ptree CmpPackages::convertDataToPtree(const std::map<std::string, std::map<std::string, std::string>> data){
+    // Convert map to ptree format
     ptree children;
     for (const auto& [arch, packages] : data){
         ptree tmp;
@@ -186,8 +198,9 @@ ptree CmpPackages::convertDataToPtree(std::map<std::string, std::map<std::string
     return children;
 }
 
-void CmpPackages::convertToJSONSaveToFile(std::string file_name)
+void CmpPackages::convertToJSONSaveToFile(const std::string file_name)
 {
+    // Convert all data to ptree and save JSON file
     ptree pt;
 
     pt.add_child("packages_in_"+_name_branch1+"_not_"+_name_branch2,
@@ -203,10 +216,10 @@ void CmpPackages::convertToJSONSaveToFile(std::string file_name)
     buf.close();
 }
 
-void CmpPackages::getAllDataConvertToJSON(std::string file_name)
+void CmpPackages::getAllDataConvertToJSON(const std::string file_name)
 {
-    generateData(_name_branch1);
-    generateData(_name_branch2);
+    genInB1NotB2(_name_branch1);
+    genInB1NotB2(_name_branch2);
     genVerOverB1B2();
     convertToJSONSaveToFile(file_name);
 }
