@@ -13,7 +13,7 @@ HEADERS_FOLDER=/usr/include
 LIB_FOLDER=/usr/local/lib
 BIN_FOLDER=/usr/local/bin
 
-DEPENDENCIES=libssl-devel boost-devel librpm-devel
+DEPENDENCIES=libssl-devel boost-devel boost-asio-devel librpm-devel
 PACKET_MANAGER=apt-get
 
 all:
