@@ -50,7 +50,8 @@ json::value ExportPackages::getResponse()
     beast::error_code ec;
     stream.shutdown(ec);
 
-    return json_text;}
+    return json_text;
+}
 
 beast::ssl_stream<beast::tcp_stream> ExportPackages::initContextAndSSL()
 {
@@ -108,7 +109,7 @@ json::value ExportPackages::receiveJSONResponse(beast::ssl_stream<beast::tcp_str
 
         http::response_parser<http::string_body> parser;
         parser.eager(true);
-	    parser.body_limit(std::numeric_limits<std::uint64_t>::max());
+	parser.body_limit(std::numeric_limits<std::uint64_t>::max());
 
         http::read(stream, buffer, parser);
         res = parser.release();
