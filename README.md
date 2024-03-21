@@ -10,6 +10,12 @@ A utility that exports information about packages in different branches and comp
 sudo apt-get install gcc-c++
 ```
 
+# Install patchelf
+
+``` sh
+sudo apt-get install patchelf
+```
+
 # Install dependencies
 
 ``` sh
