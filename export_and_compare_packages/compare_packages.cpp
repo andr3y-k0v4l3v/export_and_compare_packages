@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <boost/property_tree/json_parser.hpp>
-#include <openssl/ssl.h>
 #include <rpm/rpmvercmp.h>
 
 using boost::property_tree::write_json;
