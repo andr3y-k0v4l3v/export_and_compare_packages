@@ -5,6 +5,7 @@
 #include <rpm/rpmvercmp.h>
 
 using boost::property_tree::write_json;
+using boost::property_tree::ptree;
 
 using namespace ExpAndCmpPackages;
 

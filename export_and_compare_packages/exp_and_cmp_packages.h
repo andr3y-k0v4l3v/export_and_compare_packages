@@ -2,15 +2,14 @@
 #define EXP_AND_CMP_PACKAGES_H
 
 #include <string>
-#include <bits/stdc++.h>
+#include <map>
+#include <vector>
 
 #include <boost/json.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/asio.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/ssl.hpp>
-
-using boost::property_tree::ptree;
 
 namespace beast = boost::beast;
 
@@ -56,7 +55,7 @@ namespace ExpAndCmpPackages
         void genInB1NotB2(const std::string first_branch);
         void genVerOverB1B2();
         void convertToJSONSaveToFile(const std::string file_name);
-        ptree convertDataToPtree(const std::map<std::string, std::map<std::string, std::string>> data);
+        boost::property_tree::ptree convertDataToPtree(const std::map<std::string, std::map<std::string, std::string>> data);
     };
 }
 
