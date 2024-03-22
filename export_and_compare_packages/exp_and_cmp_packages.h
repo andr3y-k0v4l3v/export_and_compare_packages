@@ -18,7 +18,6 @@ namespace ExpAndCmpPackages
     class ExportPackages
     {
         std::string _branch;
-        std::string _archs;
         std::string _host = "rdb.altlinux.org";
         std::string _target = "/api/export/branch_binary_packages/";
         std::map< std::string, std::map<std::string, std::string> > _packages;
@@ -26,7 +25,7 @@ namespace ExpAndCmpPackages
         boost::asio::io_context _ioc;
 
     public:
-        explicit ExportPackages(std::string branch);
+        explicit ExportPackages(const std::string branch);
         std::map<std::string, std::map<std::string, std::string>> getPackages();
     private:
         boost::json::value getResponse();

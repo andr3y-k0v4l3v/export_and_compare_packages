@@ -16,7 +16,7 @@ using boost::asio::ip::tcp;
 
 using namespace ExpAndCmpPackages;
 
-ExportPackages::ExportPackages(std::string branch) : _branch(branch) {};
+ExportPackages::ExportPackages(const std::string branch) : _branch(branch) {};
 
 std::map<std::string, std::map<std::string, std::string>> ExportPackages::getPackages()
 {
@@ -109,7 +109,7 @@ json::value ExportPackages::receiveJSONResponse(beast::ssl_stream<beast::tcp_str
 
         http::response_parser<http::string_body> parser;
         parser.eager(true);
-	parser.body_limit(std::numeric_limits<std::uint64_t>::max());
+        parser.body_limit(std::numeric_limits<std::uint64_t>::max());
 
         http::read(stream, buffer, parser);
         res = parser.release();
